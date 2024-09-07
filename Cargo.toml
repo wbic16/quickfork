@@ -1,6 +1,7 @@
 [package]
 name = "quickfork"
 description = "A meta package manager and programming assistant"
+license = "MIT"
 version = "0.1.0"
 edition = "2021"
 
