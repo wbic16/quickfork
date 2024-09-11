@@ -99,43 +99,7 @@ fn handle_request(request: String, state:&mut PhextShellState) {
 
     // rust
     if trimmed.starts_with("add-rust") {
-        let rust_main = "src/main.rs";
-        let have_src = dir_exists("src");
-        let have_rust_main = file_exists(rust_main);
-        let have_gitignore = file_exists(".gitignore");
-        let have_toml = file_exists("Cargo.toml");
-
-        if have_src == false {
-            std::fs::create_dir("src").expect("Unable to create src");
-            println!("* Created src");
-        }
-
-        if have_rust_main == false {            
-            std::fs::write(rust_main, "use libphext::phext;
-fn main() {
-    println!(\"Hello World\");
-}
-").expect("Unable to write src/main.rs");
-            println!("* Added {}", rust_main);
-        }
-        if have_gitignore == false {
-
-            std::fs::write(".gitignore", "/target
-Cargo.lock").expect("Unable to add .gitignore");
-            println!("* Added .gitignore");
-        }
-        if have_toml == false {
-            std::fs::write("Cargo.toml", "[package]
-name = \"new-project\"
-version = \"0.1.0\"
-edition = \"2021\"
-
-[dependencies]
-libphext = \"0.1.7\"
-").expect("Unable to add Cargo.toml");
-            println!("* Added Cargo.toml");
-        }
-        handled = true;
+        handled = add_rust(trimmed.to_string());
     }
 
     if handled == false {
@@ -143,4 +107,44 @@ libphext = \"0.1.7\"
     } else {
         println!("Done.");
     }
+}
+
+fn add_rust(_trimmed: String) -> bool {
+    let rust_main = "src/main.rs";
+    let have_src = dir_exists("src");
+    let have_rust_main = file_exists(rust_main);
+    let have_gitignore = file_exists(".gitignore");
+    let have_toml = file_exists("Cargo.toml");
+
+    if have_src == false {
+        std::fs::create_dir("src").expect("Unable to create src");
+        println!("* Created src");
+    }
+
+    if have_rust_main == false {            
+        std::fs::write(rust_main, "use libphext::phext;
+fn main() {
+println!(\"Hello World\");
+}
+").expect("Unable to write src/main.rs");
+        println!("* Added {}", rust_main);
+    }
+    if have_gitignore == false {
+
+        std::fs::write(".gitignore", "/target
+Cargo.lock").expect("Unable to add .gitignore");
+        println!("* Added .gitignore");
+    }
+    if have_toml == false {
+        std::fs::write("Cargo.toml", "[package]
+name = \"new-project\"
+version = \"0.1.0\"
+edition = \"2021\"
+
+[dependencies]
+libphext = \"0.1.7\"
+").expect("Unable to add Cargo.toml");
+        println!("* Added Cargo.toml");
+    }
+    return true;
 }
