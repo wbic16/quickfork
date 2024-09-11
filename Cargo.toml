@@ -3,7 +3,7 @@ name = "quickfork"
 description = "A meta package manager and programming assistant"
 license = "MIT"
 homepage = "https://quickfork.net/"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2021"
 
 [dependencies]
