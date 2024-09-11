@@ -102,6 +102,10 @@ fn handle_request(request: String, state:&mut PhextShellState) {
         handled = add_rust(trimmed.to_string());
     }
 
+    if trimmed.starts_with("add-nix") {
+        handled = add_nix(trimmed.to_string());
+    }
+
     if handled == false {
         println!("Error: Unsupported command {}", trimmed);
     } else {
@@ -146,5 +150,60 @@ libphext = \"0.1.7\"
 ").expect("Unable to add Cargo.toml");
         println!("* Added Cargo.toml");
     }
+    return true;
+}
+
+fn system_command(command: &str, args: &str) {
+    use std::process::Command;
+    println!("! {} {}", command, args);
+    let error_message = format!("failed to run '{} {}'", command, args);
+    let output = Command::new(command)
+            .args(args.split(' '))
+            .output()
+            .expect(error_message.as_str());
+
+    let program_output = String::from_utf8_lossy(&output.stdout).to_string();
+    println!("{}", program_output);
+    if output.stderr.len() > 0 {
+        println!("Error: {}", String::from_utf8_lossy(&output.stderr));
+    }
+}
+
+fn app_name() -> Option<String> {
+    std::env::current_exe()
+        .ok()?
+        .file_name()?
+        .to_str()?
+        .to_owned()
+        .into()
+}
+
+fn add_nix(_trimmed: String) -> bool {
+    // see: https://dev.to/misterio/how-to-package-a-rust-app-using-nix-3lh3
+    let have_toml = file_exists("Cargo.toml");
+    let have_lock = file_exists("Cargo.lock");
+    let have_nix_config = file_exists("default.nix");
+
+    if have_toml == false {
+        system_command("nix", "run nixpkgs#cargo init --extra-experimental-features nix-command --extra-experimental-features flakes");
+    }
+    if have_lock == false {
+        system_command("nix", "run nixpkgs#cargo update --extra-experimental-features nix-command --extra-experimental-features flakes");
+    }
+    if have_nix_config == false {
+        let app_name = app_name().expect("bad environment");
+        let default_config = format!("{{ pkgs ? import <nixpkgs> {{ }} }}:
+pkgs.rustPlatform.buildRustPackage rec {{
+  pname = \"{app_name}\";
+  version = \"0.1.0\";
+  cargoLock.lockFile = ./Cargo.lock;
+  src = pkgs.lib.cleanSource ./.;
+}}
+");
+        std::fs::write("default.nix", default_config).expect("Unable to write default.nix");
+    }
+
+    system_command("nix", "build -f default.nix --extra-experimental-features nix-command");
+
     return true;
 }
