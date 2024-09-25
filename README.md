@@ -10,3 +10,7 @@ Supported Commands
 * quickfork add-rust
   * Checks for src/main.rs, Cargo.toml, and .gitignore
   * Produces a buildable hello-world if needed
+
+TODO
+----
+* Add rust-rest (axum+axum-server+tokio)
